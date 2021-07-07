@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Head from 'next/head'
+import CloseIcon from './../public/close.svg';
 
 const MONTHS = {
   '1': 'January',
@@ -15,6 +16,26 @@ const MONTHS = {
   '11': 'November',
   '12': 'December'
 }
+
+function FortuneDetail({ backgroundColor, fortune, onClose }) {
+  return (
+    <div className={`bg-${backgroundColor} w-full h-full fixed top-0 left-0`}>
+      <div className="w-full max-w-md h-full flex flex-col items-center justify-between mx-auto p-16">
+        <button className="w-8 h-8 fill-current text-white self-end" onClick={onClose}>
+          <CloseIcon />
+        </button>
+        <p className="text-white font-roboto font-bold text-xl text-center">
+          {fortune.text}
+        </p>
+
+        <p className="p-2 bg-white bg-opacity-10 flex rounded-lg text-white text-base">
+          {`${MONTHS[new Date(fortune.date).getMonth() + '']} ${new Date(fortune.date).getDay()}, ${new Date(fortune.date).getFullYear()}`}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [fortunesList, setFortunesList] = useState([
       {
@@ -82,16 +103,17 @@ export default function Home() {
         "date": "2021-11-14T03:42:42.832Z"
       }
     ]);
+  const [expandedFortune, setExpandedFortune] = useState(null);
   return (
-    <div className="p-6">
+    <div className="w-full">
       <Head>
         <title>My Fortunes</title>
       </Head>
-      <main className="w-full">
-        <p className="font-roboto font-bold tracking-tight text-3xl mt-10">
+      <main className="relative w-full max-w-md mx-auto p-8">
+        <p className="font-roboto font-bold tracking-tight text-3xl mt-10 mb-5">
           My Fortunes
         </p>
-        <div class="flex flex-wrap overflow-hidden sm:-mx-1">
+        <ul class="flex flex-wrap overflow-hidden sm:-mx-1">
           {
             fortunesList.map((fortune, i) => {
               const isFullWidth = i === 0 || ((i - 1) % 5) === 0;
@@ -107,24 +129,32 @@ export default function Home() {
               const random = Math.floor(Math.random() * Object.keys(colors).length);
               const color = colors[random];
               return (
-                <div className={`${isFullWidth ? 'w-full' : 'w-1/2'} overflow-hidden my-1 px-1`}>
-                  <div className={`${isFullWidth ? 'aspect-w-16 aspect-h-7' : 'aspect-w-1 aspect-h-1'} bg-${color} rounded-lg`}>
-                    <div className="w-full h-full p-10 flex flex-col justify-between items-start">
-                      <p className="text-white font-roboto font-bold text-base">
+                <li className={`${isFullWidth ? 'w-full' : 'w-1/2'} overflow-hidden my-1 px-1`}>
+                  <div 
+                    className={`${isFullWidth ? 'aspect-w-16 aspect-h-7' : 'aspect-w-1 aspect-h-1'} bg-${color} rounded-lg cursor-pointer`} 
+                    onClick={() => {
+                      setExpandedFortune({
+                        color,
+                        fortune
+                      })
+                    }}
+                  >
+                    <div className="w-full h-full p-8 flex flex-col justify-between items-start">
+                      <p className="text-white font-roboto font-bold text-sm">
                         {fortune.text}
                       </p>
 
-                      <p className="p-2 bg-white bg-opacity-10 flex rounded-lg text-white text-sm">
+                      <p className="p-2 bg-white bg-opacity-10 flex rounded-lg text-white text-xs">
                         {`${MONTHS[new Date(fortune.date).getMonth() + '']} ${new Date(fortune.date).getDay()}, ${new Date(fortune.date).getFullYear()}`}
                       </p>
                     </div>
                   </div>
-                </div>
+                </li>
               )
             })
           }
-
-        </div>
+        </ul>
+        { expandedFortune ? <FortuneDetail onClose={() => setExpandedFortune(null)} fortune={expandedFortune.fortune} backgroundColor={expandedFortune.color} /> : ''}
       </main>
     </div>
   )
