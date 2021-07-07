@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head'
 import CloseIcon from './../public/close.svg';
+import AddCircle from './../public/add-circle.svg';
 
 const MONTHS = {
   '1': 'January',
@@ -17,9 +18,35 @@ const MONTHS = {
   '12': 'December'
 }
 
+function CreateFortune({ onSubmit, onClose }) {
+  const [newFortune, setNewFortune] = useState('');
+  
+  return (
+    <div className='bg-white w-full h-full fixed top-0 left-0 z-20'>
+      <div className="w-full max-w-md h-full flex flex-col items-center justify-between mx-auto p-16">
+        <div className="flex flex-col w-full">
+        <button className="w-8 h-8 fill-current text-black self-end" onClick={onClose}>
+          <CloseIcon />
+        </button>
+        <input 
+          className="outline-none border-none font-roboto font-bold text-xl my-4" 
+          type="textarea" 
+          placeholder="Start Writing..."  
+          value={newFortune}
+          onChange={(e) => setNewFortune(e.target.value)}
+        />
+        </div>
+        <button onClick={() => { onSubmit({ text: newFortune, date: (new Date()) });onClose();} } className="self-end px-4 py-2 bg-black capitalize font-bold font-roboto text-white rounded-2xl">
+          done
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function FortuneDetail({ backgroundColor, fortune, onClose }) {
   return (
-    <div className={`bg-${backgroundColor} w-full h-full fixed top-0 left-0`}>
+    <div className={`bg-${backgroundColor} w-full h-full fixed top-0 left-0 z-20`}>
       <div className="w-full max-w-md h-full flex flex-col items-center justify-between mx-auto p-16">
         <button className="w-8 h-8 fill-current text-white self-end" onClick={onClose}>
           <CloseIcon />
@@ -104,6 +131,16 @@ export default function Home() {
       }
     ]);
   const [expandedFortune, setExpandedFortune] = useState(null);
+  const [isComposeNewFortune, setIsComposeNewFortune] = useState(false);
+  function onNewFortuneSubmit({ text, date }) {
+    setFortunesList([
+      ...fortunesList,
+      {
+        text,
+        date
+      }
+    ])
+  };
   return (
     <div className="w-full">
       <Head>
@@ -154,6 +191,12 @@ export default function Home() {
             })
           }
         </ul>
+        <div className="sticky bottom-0 flex justify-end w-full z-20 max-w-md mx-auto">
+          <button className="self-end bottom-0 z-10 right-0 w-14 h-14" onClick={() => setIsComposeNewFortune(true)}>
+            <AddCircle />
+          </button>
+        </div>
+        { isComposeNewFortune ? <CreateFortune onClose={() => setIsComposeNewFortune(null)} onSubmit={onNewFortuneSubmit} /> : '' }
         { expandedFortune ? <FortuneDetail onClose={() => setExpandedFortune(null)} fortune={expandedFortune.fortune} backgroundColor={expandedFortune.color} /> : ''}
       </main>
     </div>
